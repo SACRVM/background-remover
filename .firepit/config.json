@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "id": "background-remover",
+  "commands": [
+    { "name": "Serve", "type": "Shell", "icon": "🚀", "command": "cmd",
+      "args": ["/c", "npx", "serve", ".", "-l", "3342"],
+      "window": "reuse:serve", "longRunning": true },
+    { "name": "Open", "type": "Url", "icon": "✂️", "url": "http://localhost:3342/" },
+    { "name": "GitHub", "type": "Url", "icon": "🐙", "url": "https://github.com/SACRVM/background-remover" }
+  ]
+}

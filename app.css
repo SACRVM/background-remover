@@ -1,0 +1,132 @@
+/* Background Remover — scoped to the app element, never :root (on a desktop
+   that would repaint the host around it). Tokens only; the accent comes from
+   app.json via the host (standalone: index.html). */
+
+app-background-remover {
+    display: block;
+    height: 100%;
+}
+body.app-page > app-background-remover { flex: 1; min-height: 0; }
+
+app-background-remover .br-root { height: 100%; min-height: 0; }
+app-background-remover .br-split { flex: 1; min-width: 0; min-height: 0; }
+/* The split's divider draws the edge — no second hairline from the sidebar. */
+app-background-remover .br-panel:not([open]) { border-right: none; }
+
+app-background-remover .br-note {
+    margin: 0;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+app-background-remover .br-wand { display: flex; flex-direction: column; gap: 0.75rem; }
+app-background-remover .br-wand[hidden] { display: none; }
+app-background-remover .br-device {
+    margin: 0;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--accent-text);
+}
+app-background-remover .br-device:empty { display: none; }
+
+/* ---- stage: two panes under one pan-zoom transform ---- */
+app-background-remover .br-stage {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background: var(--viewport-bg);
+}
+app-background-remover .br-pane { min-width: 0; min-height: 0; cursor: grab; }
+app-background-remover .br-pane-src { border-right: 1px solid var(--border); }
+app-background-remover .br-pane .pz-layer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px 24px;
+    box-sizing: border-box;
+}
+app-background-remover .br-pane-label {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    z-index: 5;
+    pointer-events: none;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* Sized to the image, hidden until one is loaded (no blank box on an empty
+   stage). The kit sizes every canvas to its box; these keep the aspect. */
+app-background-remover .br-pane canvas {
+    display: none;
+    width: auto !important;
+    height: auto !important;
+    max-width: 100%;
+    max-height: 100%;
+    box-shadow: 0 8px 30px color-mix(in srgb, var(--sink) 50%, transparent);
+}
+app-background-remover .br-stage.has-image .br-pane canvas { display: block; }
+/* Transparency behind the cut-out. */
+app-background-remover .br-stage[data-bg="checker"] .br-out {
+    --checker-size: 16px;
+    background-color: var(--checker-a);
+    background-image:
+        linear-gradient(45deg, var(--checker-b) 25%, transparent 25%, transparent 75%, var(--checker-b) 75%),
+        linear-gradient(45deg, var(--checker-b) 25%, transparent 25%, transparent 75%, var(--checker-b) 75%);
+    background-size: var(--checker-size) var(--checker-size);
+    background-position: 0 0, calc(var(--checker-size) / 2) calc(var(--checker-size) / 2);
+}
+
+/* Magic-wand mode: a crosshair over the original; Space turns it back into a hand. */
+app-background-remover .br-pane-src.wand-mode,
+app-background-remover .br-pane-src.wand-mode .br-src { cursor: crosshair; }
+app-background-remover .br-pane-src.space-pan,
+app-background-remover .br-pane-src.space-pan .br-src { cursor: grab; }
+
+app-background-remover .nav-icon-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+
+app-background-remover .br-empty {
+    position: absolute;
+    inset: 0;
+    justify-content: center;
+    pointer-events: none;
+}
+app-background-remover .br-stage.has-image .br-empty { display: none; }
+app-background-remover .br-stage.dragover {
+    outline: 2px dashed var(--accent);
+    outline-offset: -10px;
+}
+
+/* Model download + inference. */
+app-background-remover .br-busy[hidden] { display: none; }
+app-background-remover .br-busy {
+    position: absolute;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: var(--glass);
+    backdrop-filter: blur(4px);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text);
+}
+app-background-remover .br-bar { width: 240px; }
+
+app-background-remover .br-help { padding: 16px; font-size: 0.85rem; line-height: 1.6; }
+app-background-remover .br-help ul { padding-left: 18px; margin: 8px 0; }
+
+/* Narrow: the panes stack instead of squeezing side by side. */
+@media (max-width: 768px) {
+    app-background-remover .br-stage { flex-direction: column; }
+    app-background-remover .br-pane-src { border-right: none; border-bottom: 1px solid var(--border); }
+}

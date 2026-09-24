@@ -1,0 +1,21 @@
+{
+    "id": "background-remover",
+    "name": "Background Remover",
+    "icon": "scissors",
+    "accent": "#ec4899",
+    "description": "Cut the background out of any photo with AI — soft hair matting for portraits, crisp edges for objects. Runs 100% in your browser.",
+    "kind": "view",
+    "tag": "app-background-remover",
+    "entry": "app.js",
+    "version": "1.0.0",
+    "notices": [
+        {
+            "title": "Inference",
+            "text": "transformers.js (@huggingface/transformers 4.2.0) — Apache-2.0, © Hugging Face. Loaded from jsDelivr on first use; it brings the ONNX Runtime Web (MIT, © Microsoft)."
+        },
+        {
+            "title": "Models",
+            "text": "General: briaai/RMBG-1.4 by BRIA AI — released under the BRIA RMBG-1.4 license for non-commercial use; commercial use needs an agreement with BRIA. Hair: MODNet (Xenova/modnet, from ZHKKKe/MODNet) — Apache-2.0. Both are downloaded from the Hugging Face Hub, not shipped with this app."
+        }
+    ]
+}
