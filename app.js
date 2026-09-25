@@ -111,7 +111,7 @@
         <button type="button" class="btn br-open" title="Open an image (Ctrl+O)">
             <sac-icon name="folder"></sac-icon> Open
         </button>
-        <button type="button" class="btn primary br-save" data-overflow="never" title="Save the cut-out as PNG (Ctrl+S)" disabled>
+        <button type="button" class="btn primary br-save" title="Save the cut-out as PNG (Ctrl+S)" disabled>
             <sac-icon name="download"></sac-icon> PNG
         </button>
         <button type="button" class="nav-icon-btn br-copy" title="Copy the cut-out" disabled>
@@ -160,7 +160,7 @@
                 <sac-slider class="br-feather" data-keep="feather" label="Feather" min="0" max="6" step="0.5" value="0" suffix="px"></sac-slider>
             </sac-section>
 
-            <sac-section title="Cleanup (magic wand)">
+            <sac-section title="Cleanup (magic wand)" collapsible remember="background-remover.cleanup">
                 <div>
                     <label>Mouse tool</label>
                     <sac-segmented-control class="br-tool" value="pan">
@@ -201,7 +201,7 @@
                 <div class="pz-layer"><canvas class="br-out"></canvas></div>
             </div>
             <div class="app-drop br-empty">
-                <sac-drop-zone accept="image/png,image/jpeg,image/webp,image/bmp" label="Drop an image"
+                <sac-drop-zone class="on-viewport" accept="image/png,image/jpeg,image/webp,image/bmp" label="Drop an image"
                                hint="or click to open" touch-label="Open an image" touch-hint=""></sac-drop-zone>
             </div>
             <div class="br-busy" hidden>
@@ -321,8 +321,6 @@
             // Keys and paste only while on screen — a hidden view on a desktop
             // must not answer somebody else's Ctrl+Z or Ctrl+V.
             this._onPaste = (e) => this._paste(e);
-            this._onKeyDown = (e) => this._keyDown(e);
-            this._onKeyUp = (e) => this._keyUp(e);
             this._io = new IntersectionObserver((entries) => {
                 this._setVisible(entries[entries.length - 1].isIntersecting);
             });
@@ -343,13 +341,13 @@
             this._visible = on;
             if (on) {
                 document.addEventListener("paste", this._onPaste);
-                window.addEventListener("keydown", this._onKeyDown);
-                window.addEventListener("keyup", this._onKeyUp);
                 const opts = { group: "Edit", skipInInput: true };
                 const offs = [
                     sac.hotkeys.register("mod+z", () => this._undoStep(), { ...opts, description: "Undo" }),
                     sac.hotkeys.register("mod+y", () => this._redoStep(), { ...opts, description: "Redo" }),
                     sac.hotkeys.register("mod+shift+z", () => this._redoStep(), { ...opts, description: "Redo" }),
+                    sac.hotkeys.hold("space", () => this._spaceDown(), () => this._spaceUp(),
+                        { group: "View", description: "Pan in magic-wand mode" }),
                 ];
                 const offFile = this._registerFileKeys(() => this._save());
                 if (sac.shortcuts) {
@@ -357,7 +355,6 @@
                     offs.push(sac.shortcuts.add([
                         { group: "View", keys: ["Wheel"], description: "Zoom" },
                         { group: "View", keys: ["Drag"], description: "Pan" },
-                        { group: "View", keys: "Space + drag", description: "Pan in magic-wand mode" },
                         { group: "View", keys: ["Double-click"], description: "Reset view" },
                         { group: "Magic wand", keys: ["Click"], description: "Chosen action" },
                         { group: "Magic wand", keys: ["Right-click"], description: "Opposite action" },
@@ -366,11 +363,8 @@
                 this._offHotkeys = () => { offs.forEach((off) => off()); offFile(); };
             } else {
                 document.removeEventListener("paste", this._onPaste);
-                window.removeEventListener("keydown", this._onKeyDown);
-                window.removeEventListener("keyup", this._onKeyUp);
                 this._offHotkeys?.();
                 this._offHotkeys = null;
-                this._keyUp({ code: "Space" });
             }
         }
 
@@ -912,17 +906,12 @@
 
         /* ------------------------------------------------------ space = pan -- */
 
-        _keyDown(e) {
-            if (e.code !== "Space" || this._spaceHeld) return;
-            const t = e.composedPath?.()[0] || e.target;
-            if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(t.tagName))) return;
+        _spaceDown() {
             this._spaceHeld = true;
             this._paneSrc.classList.add("space-pan");
-            e.preventDefault();
         }
 
-        _keyUp(e) {
-            if (e.code !== "Space") return;
+        _spaceUp() {
             this._spaceHeld = false;
             this._paneSrc?.classList.remove("space-pan");
         }

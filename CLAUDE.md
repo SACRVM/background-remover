@@ -40,9 +40,9 @@ Shared by the four apps that came out of DREAM TOOLS (vectorizer,
 background-remover, mesh-optimizer, svg-to-3d) — keep them identical.
 
 1. **Toolbar order:** Open (`btn`, icon `folder`, not primary) · main export
-   (`btn primary`, icon `download`, label = format, pinned with
-   `data-overflow="never"` — the ribbon's overflow folds buttons but never a
-   `sac-menu`, so an unpinned primary would vanish first on a phone) · further
+   (`btn primary`, icon `download`, label = format; since kit 2.12 the
+   toolbar overflow folds a `sac-menu` as a group, so no `data-overflow`
+   pinning) · further
    formats in one `sac-menu` "More ▾" · Copy where it applies
    (`nav-icon-btn`) · app-specific icon buttons · Credits (`copyright`) · Help
    (`info`).
@@ -51,9 +51,9 @@ background-remover, mesh-optimizer, svg-to-3d) — keep them identical.
 3. **Credits via `sac.about`** from the manifest — the `notices` in `app.json`
    are what users see, keep them complete.
 4. **Empty state = `sac-drop-zone`** in `.app-drop`, styled by the shared
-   `.app-drop` CSS block (identical in all four `app.css`: ink and glass on
-   `--lift`, because the viewport is black in both themes; clears the label
-   row and the HUD). Its click / Enter go through `context.files.open`, not
+   `.app-drop` CSS block (identical in all four `app.css`; the zone carries
+   `class="on-viewport"` because the viewport is black in both themes;
+   clears the label row and the HUD). Its click / Enter go through `context.files.open`, not
    the device picker.
 5. **Settings are remembered:** controls with `data-keep="key"` are saved to
    `context.fs` ("settings") and replayed on mount through their kit event.
@@ -72,8 +72,8 @@ background-remover, mesh-optimizer, svg-to-3d) — keep them identical.
    ("Discard unsaved changes?"). Never the native `confirm()`.
 10. **Keyboard through `sac.hotkeys` only** — no raw keydown listeners for
     shortcuts; apps with more than Open/Save get a `keyboard` button and the
-    `?` key opening a `sac-shortcut-sheet`. Hold-keys (Space to pan) stay
-    manual until the kit supports them.
+    `?` key opening a `sac-shortcut-sheet`. Hold-keys (Space to pan) go
+    through `sac.hotkeys.hold`.
 11. **Feedback is visible:** results and warnings go to `sac.toast`, work that
     blocks for more than a moment shows a busy overlay — never console only.
 12. **Kit controls with their limits:** `sac-stepper` only for short integers
@@ -118,14 +118,6 @@ Shared by the four apps that came out of DREAM TOOLS — keep identical.
   either belongs in all four — say so in the commit.
 
 ## Open items
-
-Waiting on the appkit (reported 2026-09-25 — pick up when a release ships it,
-then re-vendor):
-- Collapsible `sac-section` → make "Cleanup (magic wand)" collapsible.
-- Hold-key hotkeys in `sac.hotkeys` → move Space-to-pan off the raw
-  keydown/keyup pair.
-- Drop-zone "on viewport" variant → drop the token re-pointing in the shared
-  `.app-drop` block (all four apps at once).
 
 Owner decisions open:
 - **Accent colour:** own pink vs following the desktop colour by default.
