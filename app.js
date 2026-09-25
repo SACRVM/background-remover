@@ -709,6 +709,7 @@
         async _restoreSettings() {
             let saved = null;
             try { saved = await this._ctx.fs?.read("settings", null); } catch { saved = null; }
+            if (saved && typeof saved === "object" && this._migrateSettings) saved = this._migrateSettings(saved);
             if (saved && typeof saved === "object") {
                 for (const el of this.querySelectorAll("[data-keep]")) {
                     const key = el.dataset.keep;
@@ -717,6 +718,7 @@
                     const fire = (type, value) => el.dispatchEvent(new CustomEvent(type, { detail: { value }, bubbles: true }));
                     if (el.tagName === "SAC-TOGGLE") { el.checked = !!v; fire("sac:change", !!v); }
                     else if (el.tagName === "INPUT") { el.value = v; el.dispatchEvent(new Event("input", { bubbles: true })); }
+                    else if (el.tagName === "SAC-STEPPER") { el.value = Number(v); fire("sac:change", Number(v)); }
                     else if (el.tagName === "SAC-SLIDER") { el.value = String(v); fire("sac:input", String(v)); fire("sac:change", String(v)); }
                     else { el.value = String(v); fire("sac:change", String(v)); }
                 }
