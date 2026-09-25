@@ -85,10 +85,9 @@ app-background-remover .br-pane-src.space-pan .br-src { cursor: grab; }
 app-background-remover .nav-icon-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
 /* ---- empty state: the shared .app-drop block (same in all four DREAM
-   TOOLS-born apps — keep it identical). The zone lies on --viewport-bg,
-   which is black in BOTH themes; its class="on-viewport" (kit 2.12) makes
-   it read dark in every theme. The wrapper clears the top label row and
-   the bottom HUD. ---- */
+   TOOLS-born apps — keep it identical). The zone carries class
+   "on-viewport" (kit 2.12.0), so it reads dark on --viewport-bg in both
+   themes. The wrapper clears the top label row and the bottom HUD. ---- */
 .app-drop {
     position: absolute;
     inset: 0;
