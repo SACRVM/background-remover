@@ -87,6 +87,52 @@ background-remover, mesh-optimizer, svg-to-3d) — keep them identical.
 
 **Language:** chat in German, code/docs/commits in English.
 
+## Develop, test, publish
+
+Shared by the four apps that came out of DREAM TOOLS — keep identical.
+
+- **Dev loop:** `npx serve . -l 3342` (Firepit command "Serve"), F5. `serve.json`
+  disables caching.
+- **Test both runtimes — they fail differently.** Standalone (`index.html`,
+  vendored kit) AND installed on https://desktop.sacrvm.dev/ (the host's kit
+  is live there; the app is injected into the host page). Recipe and a
+  template script: global knowledge doc "Headless-testing SACRVM appkit apps"
+  (`firepit_knowledge_search`). Stub `context.files.save/open` in tests —
+  real pickers hang headless.
+- **Always check:** dark + light theme + a 390px phone viewport (look at the
+  screenshots), console clean, settings survive a reload, every export
+  arrives, Ctrl+O / Ctrl+S.
+- **Publish:** bump `version` in `app.json` (semver: fix = patch, feature =
+  minor), commit, push to `main`. GitHub Pages serves `main` / root; wait
+  until `https://sacrvm.github.io/<repo>/app.json` shows the new version,
+  then re-test installed on the desktop. The repo carries the topic
+  `sacrvm-app` → listed in the desktop's App Store. Desktops store the
+  address, not a copy: every push is live for every installation.
+- **Kit upgrade:** delete `kit/`, unzip the new release's `kit/` verbatim
+  (`gh release download vX.Y.Z -R SACRVM/sacrvm-appkit`), check
+  `CONSUMING.md` / `MIGRATION.md` for breakers, test both runtimes, commit
+  "Vendor SACRVM APPKIT X.Y.Z". Never edit `kit/`.
+- **Siblings:** vectorizer, background-remover, mesh-optimizer, svg-to-3d
+  share the UI conventions and the `_restoreSettings` / `_about` /
+  `_wireDropZone` / `_registerFileKeys` snippet byte-for-byte. A change to
+  either belongs in all four — say so in the commit.
+
+## Open items
+
+Waiting on the appkit (reported 2026-09-25 — pick up when a release ships it,
+then re-vendor):
+- Collapsible `sac-section` → make "Cleanup (magic wand)" collapsible.
+- Hold-key hotkeys in `sac.hotkeys` → move Space-to-pan off the raw
+  keydown/keyup pair.
+- Drop-zone "on viewport" variant → drop the token re-pointing in the shared
+  `.app-drop` block (all four apps at once).
+
+Owner decisions open:
+- **Accent colour:** own pink vs following the desktop colour by default.
+- App → app hand-off deferred (see vectorizer's note; the shared file space
+  bridges it).
+- RMBG-1.4 is non-commercial — keep the notice if the model changes.
+
 ## Firepit inbox
 
 At the start of a session, read any pending messages in `.firepit/inbox/*.md` — cross-project notes Firepit routes here. Act on each, then mark it done with the `firepit_inbox_complete` MCP tool, passing the message's filename as the `id`.
