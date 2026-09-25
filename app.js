@@ -106,6 +106,7 @@
             sac.app.styles(BASE + "app.css", CSS_ID);
             this.innerHTML = `
 <sac-nav brand="BACKGROUND REMOVER" brand-icon="scissors" brand-href="#/" host-nav="wide">
+    <div slot="context" class="br-theme"><sac-theme-toggle></sac-theme-toggle></div>
     <div slot="toolbar" class="toolbar">
         <button type="button" class="btn br-open" title="Open an image (Ctrl+O)">
             <sac-icon name="folder"></sac-icon> Open
@@ -121,6 +122,12 @@
         </button>
         <button type="button" class="nav-icon-btn br-redo" title="Redo (Ctrl+Y)" disabled>
             <sac-icon name="redo"></sac-icon>
+        </button>
+        <button type="button" class="nav-icon-btn br-fit" title="Reset view">
+            <sac-icon name="fit"></sac-icon>
+        </button>
+        <button type="button" class="nav-icon-btn br-keys" title="Keyboard shortcuts (?)">
+            <sac-icon name="keyboard"></sac-icon>
         </button>
         <button type="button" class="nav-icon-btn br-credits" title="Credits &amp; licences">
             <sac-icon name="copyright"></sac-icon>
@@ -169,7 +176,7 @@
                             <button data-value="restore">Restore</button>
                         </sac-segmented-control>
                     </div>
-                    <sac-slider class="br-tol" data-keep="tol" label="Tolerance" min="1" max="100" step="1" value="12"></sac-slider>
+                    <sac-slider class="br-tol" data-keep="tol" label="Tolerance" min="1" max="100" step="1" value="12" suffix="%"></sac-slider>
                     <sac-slider class="br-wandfeather" data-keep="wandfeather" label="Soften edge" min="0" max="4" step="0.5" value="1" suffix="px"></sac-slider>
                     <button type="button" class="btn br-reset">Reset mask</button>
                 </div>
@@ -238,8 +245,11 @@
         <p><b>Open</b> (Ctrl+O), drop or paste (Ctrl+V) an image. <b>PNG</b> (Ctrl+S) saves the cut-out and
            always asks where; the copy button puts it on the clipboard.</p>
         <h3>View</h3>
-        <p>Wheel to zoom, drag to pan, double-click to reset — both panes move together.
-           In magic-wand mode, pan with the middle mouse button or by holding Space.</p>
+        <p>Wheel to zoom, drag to pan, double-click or the reset-view button to reset — both panes
+           move together. In magic-wand mode, pan with the middle mouse button or by holding Space.</p>
+        <p>All shortcuts: the keyboard button or <b>?</b>.</p>
+        <p>Hand edits to the mask count as unsaved work: opening another image or switching the
+           model asks before they are thrown away.</p>
         <p>Licences and credits: the © button.</p>
     </div>
 </sac-window>
@@ -251,6 +261,7 @@
             const $ = (s) => this.querySelector(s);
             const nav = $("sac-nav");
             if (nav) nav.host = context.host;
+            if (context.host) $(".br-theme")?.remove();   // hosted: the desktop has its own theme toggle
 
             this._stage = $(".br-stage");
             this._paneSrc = $(".br-pane-src");
@@ -290,6 +301,8 @@
             this._name = "cutout";
             this._spaceHeld = false;
             this._runId = 0;            // a newer run makes an older one's result stale
+            this._dirty = false;        // the mask has hand edits the last save does not hold
+            this._modelKey = this.ui.model.value;   // the model the current mask came from
 
             this._pz = sac.setupPanZoom({
                 panes: [
@@ -339,6 +352,17 @@
                     sac.hotkeys.register("mod+shift+z", () => this._redoStep(), { ...opts, description: "Redo" }),
                 ];
                 const offFile = this._registerFileKeys(() => this._save());
+                if (sac.shortcuts) {
+                    offs.push(sac.shortcuts.bind());
+                    offs.push(sac.shortcuts.add([
+                        { group: "View", keys: ["Wheel"], description: "Zoom" },
+                        { group: "View", keys: ["Drag"], description: "Pan" },
+                        { group: "View", keys: "Space + drag", description: "Pan in magic-wand mode" },
+                        { group: "View", keys: ["Double-click"], description: "Reset view" },
+                        { group: "Magic wand", keys: ["Click"], description: "Chosen action" },
+                        { group: "Magic wand", keys: ["Right-click"], description: "Opposite action" },
+                    ]));
+                }
                 this._offHotkeys = () => { offs.forEach((off) => off()); offFile(); };
             } else {
                 document.removeEventListener("paste", this._onPaste);
@@ -358,6 +382,9 @@
             this._copyBtn.addEventListener("click", () => this._copy());
             this._undoBtn.addEventListener("click", () => this._undoStep());
             this._redoBtn.addEventListener("click", () => this._redoStep());
+            this.querySelector(".br-fit").addEventListener("click", () => this._pz.reset());
+            this.querySelector(".br-keys").addEventListener("click", () =>
+                sac.shortcuts?.show({ title: "Background Remover shortcuts" }));
             this.querySelector(".br-credits").addEventListener("click", () => this._about());
             this.querySelector(".br-help-btn").addEventListener("click", () => this.querySelector(".br-help-win").open());
         }
@@ -380,8 +407,12 @@
             this._on(ui.cut, "sac:input", () => this._scheduleRender());
             this._on(ui.feather, "sac:input", () => this._scheduleRender());
 
-            this._on(ui.model, "sac:change", () => {
-                if (this._image) this._infer();   // re-run with the newly chosen model
+            this._on(ui.model, "sac:change", async (v) => {
+                if (!this._image) { this._modelKey = v; return; }
+                // A re-run replaces the mask — hand edits would be gone.
+                if (!(await this._discardOk())) { ui.model.value = this._modelKey; return; }
+                this._modelKey = v;
+                this._infer();
             });
             this._on(ui.tool, "sac:change", (v) => {
                 const wand = v === "wand";
@@ -393,6 +424,7 @@
                 this._pushHistory();
                 this._mask = this._baseMask.slice();
                 this._render();
+                this._setDirty(true);
             });
         }
 
@@ -434,6 +466,7 @@
                 sac.toast?.("That is not an image.", { kind: "warn" });
                 return;
             }
+            if (!(await this._discardOk())) return;
             this._name = (file.name && file.name.replace(/\.[^.]+$/, "")) || "cutout";
             const url = URL.createObjectURL(file);
             try {
@@ -475,6 +508,7 @@
                     name: this._name + "_cutout.png", accept: ".png", title: "Save cut-out",
                 });
                 if (!saved) return;
+                this._setDirty(false);
                 sac.toast?.(`Saved ${saved.name}`, { kind: "success" });
             } catch (err) {
                 console.error("[background-remover] save failed:", err);
@@ -573,6 +607,7 @@
                 const mask = await tf.RawImage.fromTensor(t[0].mul(255).to("uint8")).resize(this._dims.w, this._dims.h);
                 this._mask = mask.data;
                 this._baseMask = this._mask.slice();
+                this._setDirty(false);
                 this._undo.length = 0;
                 this._redo.length = 0;
                 this._syncHistory();
@@ -771,6 +806,7 @@
             const rgba = this._rgba;
 
             this._pushHistory();
+            this._setDirty(true);
             const before = this._undo[this._undo.length - 1];   // pre-edit alpha, for the soft blend
 
             const seed = sy * w + sx;
@@ -818,6 +854,29 @@
 
         /* ---------------------------------------------------------- history -- */
 
+        /* ---------------------------------------------------- unsaved work -- */
+
+        _setDirty(on) {
+            this._dirty = !!on;
+            this._ctx.setDirty?.(this._dirty);
+        }
+
+        /** Hand edits not saved yet? Ask before throwing them away → true to go on. */
+        async _discardOk() {
+            if (!this._dirty) return true;
+            const a = await sac.dialog.confirm({
+                title: "Discard unsaved changes?",
+                message: `${this._name}_cutout.png`,
+                buttons: [
+                    { action: "cancel", label: "Cancel", kind: "default" },
+                    { action: "discard", label: "Discard", kind: "destructive" },
+                ],
+            });
+            if (a !== "discard") return false;
+            this._setDirty(false);
+            return true;
+        }
+
         _syncHistory() {
             this._undoBtn.disabled = this._undo.length === 0;
             this._redoBtn.disabled = this._redo.length === 0;
@@ -837,6 +896,7 @@
             this._mask = this._undo.pop();
             this._render();
             this._syncHistory();
+            this._setDirty(true);
         }
 
         _redoStep() {
@@ -845,6 +905,7 @@
             this._mask = this._redo.pop();
             this._render();
             this._syncHistory();
+            this._setDirty(true);
         }
 
         /* ------------------------------------------------------ space = pan -- */
