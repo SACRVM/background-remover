@@ -110,7 +110,7 @@
         <button type="button" class="btn br-open" title="Open an image (Ctrl+O)">
             <sac-icon name="folder"></sac-icon> Open
         </button>
-        <button type="button" class="btn primary br-save" title="Save the cut-out as PNG (Ctrl+S)" disabled>
+        <button type="button" class="btn primary br-save" data-overflow="never" title="Save the cut-out as PNG (Ctrl+S)" disabled>
             <sac-icon name="download"></sac-icon> PNG
         </button>
         <button type="button" class="nav-icon-btn br-copy" title="Copy the cut-out" disabled>

@@ -34,17 +34,35 @@ as the standalone harness, and `kit/` — the vendored kit.
 - If the kit is missing something, route it to the appkit via Firepit instead
   of working around it here.
 
-## UI conventions (shared by vectorizer, background-remover, mesh-optimizer, svg-to-3d)
+## UI conventions
 
-1. **Toolbar order:** Open (`btn`, `folder`) · main export (`btn primary`, `download`, the format as label) · further formats in one `sac-menu` · Copy (`nav-icon-btn`) · app-specific icon buttons · Credits (`copyright`) · Help (`info`).
-2. **Exports always ask** (Save as…) — no silent overwrite through a kept file handle.
-3. **Credits** open `sac.about` with the manifest (its `notices` carry the third-party licences).
-4. **Empty state = `sac-drop-zone`**; its click goes through `context.files.open` (the host's file space), and the stage-wide drop ignores drops on the zone.
-5. **Settings are remembered:** controls with `data-keep` are stored in `context.fs` (`settings`) and restored by replaying their kit event.
-6. **Ctrl+O / Ctrl+S** (open / main export) through `sac.hotkeys`, only while the app is on screen.
-7. **No prose on the UI.** Panels and empty states carry controls, labels and data only; every explanation lives in the Help window.
+Shared by the four apps that came out of DREAM TOOLS (vectorizer,
+background-remover, mesh-optimizer, svg-to-3d) — keep them identical.
 
-The shell code for 3–6 is one shared block in `app.js` ("the app shell") — keep the four copies in step.
+1. **Toolbar order:** Open (`btn`, icon `folder`, not primary) · main export
+   (`btn primary`, icon `download`, label = format, pinned with
+   `data-overflow="never"` — the ribbon's overflow folds buttons but never a
+   `sac-menu`, so an unpinned primary would vanish first on a phone) · further
+   formats in one `sac-menu` "More ▾" · Copy where it applies
+   (`nav-icon-btn`) · app-specific icon buttons · Credits (`copyright`) · Help
+   (`info`).
+2. **Exports always ask** (Save as…) — no silent overwrite through a kept
+   handle. Ctrl+S on an empty app does nothing.
+3. **Credits via `sac.about`** from the manifest — the `notices` in `app.json`
+   are what users see, keep them complete.
+4. **Empty state = `sac-drop-zone`** in `.app-drop`, styled by the shared
+   `.app-drop` CSS block (identical in all four `app.css`: ink and glass on
+   `--lift`, because the viewport is black in both themes; clears the label
+   row and the HUD). Its click / Enter go through `context.files.open`, not
+   the device picker.
+5. **Settings are remembered:** controls with `data-keep="key"` are saved to
+   `context.fs` ("settings") and replayed on mount through their kit event.
+   Per-document values (e.g. a threshold fitted to one image) are not kept.
+6. **Ctrl+O / Ctrl+S** (open / main export) through `sac.hotkeys`, registered
+   only while the app is on screen.
+7. **No prose on the UI.** Panels, windows and the empty state carry controls,
+   short labels and data readouts only — every explanation goes into the Help
+   window.
 
 **Language:** chat in German, code/docs/commits in English.
 
