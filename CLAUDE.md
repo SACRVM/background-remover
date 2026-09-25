@@ -34,6 +34,18 @@ as the standalone harness, and `kit/` — the vendored kit.
 - If the kit is missing something, route it to the appkit via Firepit instead
   of working around it here.
 
+## UI conventions (shared by vectorizer, background-remover, mesh-optimizer, svg-to-3d)
+
+1. **Toolbar order:** Open (`btn`, `folder`) · main export (`btn primary`, `download`, the format as label) · further formats in one `sac-menu` · Copy (`nav-icon-btn`) · app-specific icon buttons · Credits (`copyright`) · Help (`info`).
+2. **Exports always ask** (Save as…) — no silent overwrite through a kept file handle.
+3. **Credits** open `sac.about` with the manifest (its `notices` carry the third-party licences).
+4. **Empty state = `sac-drop-zone`**; its click goes through `context.files.open` (the host's file space), and the stage-wide drop ignores drops on the zone.
+5. **Settings are remembered:** controls with `data-keep` are stored in `context.fs` (`settings`) and restored by replaying their kit event.
+6. **Ctrl+O / Ctrl+S** (open / main export) through `sac.hotkeys`, only while the app is on screen.
+7. **No prose on the UI.** Panels and empty states carry controls, labels and data only; every explanation lives in the Help window.
+
+The shell code for 3–6 is one shared block in `app.js` ("the app shell") — keep the four copies in step.
+
 **Language:** chat in German, code/docs/commits in English.
 
 ## Firepit inbox

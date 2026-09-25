@@ -23,9 +23,12 @@ The original and the cut-out sit side by side and zoom and pan together.
 - **Magic wand:** click a region on the original to flood-fill a
   similar-coloured area and remove it — or restore it. Right-click does the
   opposite; undo / redo with Ctrl+Z / Ctrl+Y.
-- **In:** open, drop or paste (Ctrl+V) an image. **Out:** save a PNG or copy
-  it — straight into the [Vectorizer](https://github.com/SACRVM/vectorizer)
-  to turn the cut-out into an SVG silhouette.
+- **In:** open (Ctrl+O), drop or paste (Ctrl+V) an image. **Out:** save a
+  PNG (Ctrl+S) or copy it — straight into the
+  [Vectorizer](https://github.com/SACRVM/vectorizer) to turn the cut-out into
+  an SVG silhouette.
+- **Remembers** its settings (model, output, edge, wand) between sessions;
+  credits and licences are one click away in the app.
 
 ## Install on a desktop
 

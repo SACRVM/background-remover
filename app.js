@@ -107,20 +107,23 @@
             this.innerHTML = `
 <sac-nav brand="BACKGROUND REMOVER" brand-icon="scissors" brand-href="#/" host-nav="wide">
     <div slot="toolbar" class="toolbar">
-        <button type="button" class="btn primary br-open" title="Open an image">
-            <sac-icon name="image"></sac-icon> Open
+        <button type="button" class="btn br-open" title="Open an image (Ctrl+O)">
+            <sac-icon name="folder"></sac-icon> Open
         </button>
-        <button type="button" class="btn primary br-save" title="Save the cut-out as PNG" disabled>
+        <button type="button" class="btn primary br-save" title="Save the cut-out as PNG (Ctrl+S)" disabled>
             <sac-icon name="download"></sac-icon> PNG
         </button>
-        <button type="button" class="btn br-copy" title="Copy the cut-out" disabled>
-            <sac-icon name="copy"></sac-icon> Copy
+        <button type="button" class="nav-icon-btn br-copy" title="Copy the cut-out" disabled>
+            <sac-icon name="copy"></sac-icon>
         </button>
         <button type="button" class="nav-icon-btn br-undo" title="Undo (Ctrl+Z)" disabled>
             <sac-icon name="undo"></sac-icon>
         </button>
         <button type="button" class="nav-icon-btn br-redo" title="Redo (Ctrl+Y)" disabled>
             <sac-icon name="redo"></sac-icon>
+        </button>
+        <button type="button" class="nav-icon-btn br-credits" title="Credits &amp; licences">
+            <sac-icon name="copyright"></sac-icon>
         </button>
         <button type="button" class="nav-icon-btn br-help-btn" title="Help">
             <sac-icon name="info"></sac-icon>
@@ -136,23 +139,21 @@
             <sac-section title="Output">
                 <div>
                     <label>Background</label>
-                    <sac-segmented-control class="br-bgmode" value="transparent">
+                    <sac-segmented-control class="br-bgmode" data-keep="bgmode" value="transparent">
                         <button data-value="transparent">Transparent</button>
                         <button data-value="color">Solid color</button>
                     </sac-segmented-control>
                 </div>
-                <sac-color-field class="br-bgcolor" label="Fill color" value="#1e293b" disabled></sac-color-field>
-                <sac-toggle class="br-crop" label="Auto-crop to subject"></sac-toggle>
+                <sac-color-field class="br-bgcolor" data-keep="bgcolor" label="Fill color" value="#1e293b" disabled></sac-color-field>
+                <sac-toggle class="br-crop" data-keep="crop" label="Auto-crop to subject"></sac-toggle>
             </sac-section>
 
             <sac-section title="Edge">
-                <sac-slider class="br-cut" label="Mask cutoff (0 = soft)" min="0" max="100" step="1" value="0" suffix="%"></sac-slider>
-                <sac-slider class="br-feather" label="Feather" min="0" max="6" step="0.5" value="0" suffix="px"></sac-slider>
+                <sac-slider class="br-cut" data-keep="cut" label="Mask cutoff (0 = soft)" min="0" max="100" step="1" value="0" suffix="%"></sac-slider>
+                <sac-slider class="br-feather" data-keep="feather" label="Feather" min="0" max="6" step="0.5" value="0" suffix="px"></sac-slider>
             </sac-section>
 
             <sac-section title="Cleanup (magic wand)">
-                <p class="br-note">Fix what the model got wrong: click a region on the <b>original</b>
-                   to flood-fill a similar-coloured area and remove it — or restore it.</p>
                 <div>
                     <label>Mouse tool</label>
                     <sac-segmented-control class="br-tool" value="pan">
@@ -163,29 +164,22 @@
                 <div class="br-wand" hidden>
                     <div>
                         <label>Click action</label>
-                        <sac-segmented-control class="br-wandmode" value="remove">
+                        <sac-segmented-control class="br-wandmode" data-keep="wandmode" value="remove">
                             <button data-value="remove">Remove</button>
                             <button data-value="restore">Restore</button>
                         </sac-segmented-control>
-                        <p class="br-note">Right-click does the opposite.</p>
                     </div>
-                    <sac-slider class="br-tol" label="Tolerance" min="1" max="100" step="1" value="12"></sac-slider>
-                    <sac-slider class="br-wandfeather" label="Soften edge" min="0" max="4" step="0.5" value="1" suffix="px"></sac-slider>
+                    <sac-slider class="br-tol" data-keep="tol" label="Tolerance" min="1" max="100" step="1" value="12"></sac-slider>
+                    <sac-slider class="br-wandfeather" data-keep="wandfeather" label="Soften edge" min="0" max="4" step="0.5" value="1" suffix="px"></sac-slider>
                     <button type="button" class="btn br-reset">Reset mask</button>
                 </div>
             </sac-section>
 
             <sac-section title="Model">
-                <sac-segmented-control class="br-model" value="general">
+                <sac-segmented-control class="br-model" data-keep="model" value="general">
                     <button data-value="general">General (RMBG)</button>
                     <button data-value="portrait">Hair (MODNet)</button>
                 </sac-segmented-control>
-                <p class="br-note br-model-hint"></p>
-            </sac-section>
-
-            <sac-section title="Engine">
-                <p class="br-note">Runs fully in your browser. The model downloads once, then it is
-                   cached. No upload, no account, no cost.</p>
                 <p class="br-device"></p>
             </sac-section>
         </div>
@@ -199,10 +193,9 @@
                 <span class="br-pane-label">Cut-out</span>
                 <div class="pz-layer"><canvas class="br-out"></canvas></div>
             </div>
-            <div class="empty-state br-empty">
-                <sac-icon name="scissors"></sac-icon>
-                <b>Drop an image here, click Open, or paste one</b>
-                <p>Removes the background fully on your machine — no upload, no cost.</p>
+            <div class="app-drop br-empty">
+                <sac-drop-zone accept="image/png,image/jpeg,image/webp,image/bmp" label="Drop an image"
+                               hint="or click to open" touch-label="Open an image" touch-hint=""></sac-drop-zone>
             </div>
             <div class="br-busy" hidden>
                 <sac-spinner label="Working" style="--spinner-size: 28px"></sac-spinner>
@@ -217,23 +210,37 @@
 <sac-window class="br-help-win" title="Background Remover Guide" width="500px" height="480px"
             left="calc(50vw - 250px)" top="12vh" controls="close">
     <div class="br-help">
-        <p>Removes the background from any photo using AI, running <b>100% in your browser</b>.
-           No upload, no account, no cost.</p>
+        <p>Removes the background from any photo using AI, running <b>100% in your browser</b>:
+           no upload, no account, no cost. The model downloads once and the browser caches it,
+           so later runs start at once and work offline.</p>
+        <h3>Model</h3>
         <ul>
-            <li><b>Model:</b> <b>General (RMBG-1.4)</b> is the default — best for objects, products and most
-                photos; <b>Hair (MODNet)</b> keeps soft hair and fine edges for people. Switching re-runs at once.</li>
-            <li>The first run downloads the model once (~26–44&nbsp;MB); after that it is cached.</li>
-            <li><b>Background:</b> keep it transparent, or fill a solid colour.</li>
-            <li><b>Mask cutoff</b> hardens edges (leave it at 0 for soft hair); <b>Feather</b> softens them.</li>
-            <li><b>Auto-crop</b> trims the canvas to the subject.</li>
-            <li><b>Magic wand</b> (Cleanup): switch the mouse tool to it, then click a region on the
-                <b>original</b> to flood-fill a similar-coloured area and <b>Remove</b> leftover background
-                or <b>Restore</b> wrongly cut parts. Left-click is the chosen action, right-click the opposite.
-                <b>Tolerance</b> sets how far it spreads. <b>Undo / Redo</b> (Ctrl+Z / Ctrl+Y) step through edits;
-                <b>Reset mask</b> goes back to the model's output.</li>
+            <li><b>General (RMBG-1.4)</b>, the default: objects, products and most photos. Crisp, but harder
+                edges with less hair detail. About 44&nbsp;MB.</li>
+            <li><b>Hair (MODNet)</b>: people and portraits, soft hair and fine edges. About 26&nbsp;MB.</li>
         </ul>
+        <p>Switching the model re-runs the current image. The line under the switch shows which model ran
+           and on what (WASM = the CPU path).</p>
+        <h3>Output and edge</h3>
+        <ul>
+            <li><b>Background:</b> transparent, or a solid fill colour.</li>
+            <li><b>Auto-crop</b> trims the canvas to the subject.</li>
+            <li><b>Mask cutoff</b> hardens edges (leave it at 0 for soft hair); <b>Feather</b> softens them.</li>
+        </ul>
+        <h3>Cleanup: magic wand</h3>
+        <p>Fixes what the model got wrong. Switch the mouse tool to <b>Magic wand</b>, then click a region on the
+           <b>original</b> (left): it flood-fills a similar-coloured area and <b>removes</b> it (leftover
+           background) or <b>restores</b> it (wrongly cut parts). Left-click is the chosen action,
+           <b>right-click the opposite</b>. <b>Tolerance</b> sets how far it spreads, <b>Soften edge</b>
+           feathers the new edge. <b>Undo / Redo</b> (Ctrl+Z / Ctrl+Y) step through edits;
+           <b>Reset mask</b> goes back to the model's output.</p>
+        <h3>Files</h3>
+        <p><b>Open</b> (Ctrl+O), drop or paste (Ctrl+V) an image. <b>PNG</b> (Ctrl+S) saves the cut-out and
+           always asks where; the copy button puts it on the clipboard.</p>
+        <h3>View</h3>
         <p>Wheel to zoom, drag to pan, double-click to reset — both panes move together.
            In magic-wand mode, pan with the middle mouse button or by holding Space.</p>
+        <p>Licences and credits: the © button.</p>
     </div>
 </sac-window>
 `;
@@ -269,7 +276,6 @@
                 tol: $(".br-tol"),
                 wandFeather: $(".br-wandfeather"),
                 model: $(".br-model"),
-                modelHint: $(".br-model-hint"),
             };
 
             this._loaded = {};          // model key → { model, processor, device }
@@ -282,7 +288,6 @@
             this._undo = [];
             this._redo = [];
             this._name = "cutout";
-            this._fileRef = null;
             this._spaceHeld = false;
             this._runId = 0;            // a newer run makes an older one's result stale
 
@@ -298,7 +303,7 @@
             this._wireControls();
             this._wireDrop();
             this._wireWand();
-            this._syncModelHint();
+            this._wireDropZone((file) => this._loadFile(file));
 
             // Keys and paste only while on screen — a hidden view on a desktop
             // must not answer somebody else's Ctrl+Z or Ctrl+V.
@@ -309,6 +314,8 @@
                 this._setVisible(entries[entries.length - 1].isIntersecting);
             });
             this._io.observe(this);
+
+            this._restoreSettings();
         }
 
         onUnmount() {
@@ -331,7 +338,8 @@
                     sac.hotkeys.register("mod+y", () => this._redoStep(), { ...opts, description: "Redo" }),
                     sac.hotkeys.register("mod+shift+z", () => this._redoStep(), { ...opts, description: "Redo" }),
                 ];
-                this._offHotkeys = () => offs.forEach((off) => off());
+                const offFile = this._registerFileKeys(() => this._save());
+                this._offHotkeys = () => { offs.forEach((off) => off()); offFile(); };
             } else {
                 document.removeEventListener("paste", this._onPaste);
                 window.removeEventListener("keydown", this._onKeyDown);
@@ -350,6 +358,7 @@
             this._copyBtn.addEventListener("click", () => this._copy());
             this._undoBtn.addEventListener("click", () => this._undoStep());
             this._redoBtn.addEventListener("click", () => this._redoStep());
+            this.querySelector(".br-credits").addEventListener("click", () => this._about());
             this.querySelector(".br-help-btn").addEventListener("click", () => this.querySelector(".br-help-win").open());
         }
 
@@ -372,7 +381,6 @@
             this._on(ui.feather, "sac:input", () => this._scheduleRender());
 
             this._on(ui.model, "sac:change", () => {
-                this._syncModelHint();
                 if (this._image) this._infer();   // re-run with the newly chosen model
             });
             this._on(ui.tool, "sac:change", (v) => {
@@ -395,13 +403,10 @@
             ["dragleave", "drop"].forEach((ev) =>
                 stage.addEventListener(ev, (e) => { e.preventDefault(); stage.classList.remove("dragover"); }));
             stage.addEventListener("drop", (e) => {
+                if (e.composedPath().some((n) => n.tagName === "SAC-DROP-ZONE")) return;   // the zone handles its own
                 const file = e.dataTransfer?.files?.[0];
                 if (file) this._loadFile(file);
             });
-        }
-
-        _syncModelHint() {
-            this.ui.modelHint.textContent = MODELS[this.ui.model.value].hint;
         }
 
         _setReady(ready) {
@@ -430,7 +435,6 @@
                 return;
             }
             this._name = (file.name && file.name.replace(/\.[^.]+$/, "")) || "cutout";
-            this._fileRef = null;
             const url = URL.createObjectURL(file);
             try {
                 const tf = await loadTransformers();
@@ -463,15 +467,14 @@
         }
 
         async _save() {
+            if (!this._mask) return;
             const blob = await this._outputBlob();
             if (!blob) return;
             try {
                 const saved = await this._ctx.files.save(blob, {
                     name: this._name + "_cutout.png", accept: ".png", title: "Save cut-out",
-                    handle: this._fileRef?.handle,
                 });
                 if (!saved) return;
-                this._fileRef = saved;
                 sac.toast?.(`Saved ${saved.name}`, { kind: "success" });
             } catch (err) {
                 console.error("[background-remover] save failed:", err);
@@ -652,6 +655,83 @@
 
             this._stage.setAttribute("data-bg", solid ? "solid" : "checker");
             this._setReady(true);
+        }
+
+        /* ------------------------------------------------ the app shell ---- *
+         * Shared by the four DREAM-TOOLS-born apps (vectorizer, background-
+         * remover, mesh-optimizer, svg-to-3d) — keep the copies in step.
+         *   · settings: every control with data-keep is remembered in
+         *     context.fs ("settings") and restored by replaying its event;
+         *   · credits: sac.about from the manifest (notices included);
+         *   · the empty state is a sac-drop-zone whose click goes through
+         *     context.files (the host's file space), not the device picker.
+         * ------------------------------------------------------------------ */
+
+        _keepValue(el) {
+            return el.tagName === "SAC-TOGGLE" ? el.checked : el.value;
+        }
+
+        async _restoreSettings() {
+            let saved = null;
+            try { saved = await this._ctx.fs?.read("settings", null); } catch { saved = null; }
+            if (saved && typeof saved === "object") {
+                for (const el of this.querySelectorAll("[data-keep]")) {
+                    const key = el.dataset.keep;
+                    if (!(key in saved)) continue;
+                    const v = saved[key];
+                    const fire = (type, value) => el.dispatchEvent(new CustomEvent(type, { detail: { value }, bubbles: true }));
+                    if (el.tagName === "SAC-TOGGLE") { el.checked = !!v; fire("sac:change", !!v); }
+                    else if (el.tagName === "INPUT") { el.value = v; el.dispatchEvent(new Event("input", { bubbles: true })); }
+                    else if (el.tagName === "SAC-SLIDER") { el.value = String(v); fire("sac:input", String(v)); fire("sac:change", String(v)); }
+                    else { el.value = String(v); fire("sac:change", String(v)); }
+                }
+            }
+            // Watch only after restoring, so the replay above does not write back.
+            const save = () => {
+                clearTimeout(this._keepTimer);
+                this._keepTimer = setTimeout(() => {
+                    const out = {};
+                    for (const el of this.querySelectorAll("[data-keep]")) out[el.dataset.keep] = this._keepValue(el);
+                    Promise.resolve(this._ctx.fs?.write("settings", out)).catch(() => {});
+                }, 400);
+            };
+            for (const el of this.querySelectorAll("[data-keep]")) {
+                for (const type of ["sac:change", "sac:input", "input"]) el.addEventListener(type, save);
+            }
+        }
+
+        async _about() {
+            if (!this._manifest) {
+                this._manifest = this._ctx.manifest
+                    || await fetch(BASE + "app.json").then((r) => r.json()).catch(() => null);
+            }
+            if (sac.about) sac.about.open(this._manifest || { name: this.tagName.toLowerCase() });
+        }
+
+        _wireDropZone(onFile) {
+            const wrap = this.querySelector(".app-drop");
+            const zone = wrap.querySelector("sac-drop-zone");
+            // Click / Enter / Space open through context.files, like the Open button.
+            const intercept = (e) => {
+                if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return;
+                if (!e.composedPath().includes(zone)) return;
+                e.preventDefault();
+                e.stopPropagation();
+                this._open();
+            };
+            wrap.addEventListener("click", intercept, true);
+            wrap.addEventListener("keydown", intercept, true);
+            zone.addEventListener("sac:files", (e) => { const f = e.detail.files[0]; if (f) onFile(f); });
+            zone.addEventListener("sac:rejected", () => sac.toast?.("That file type does not open here.", { kind: "warn" }));
+        }
+
+        /** Ctrl+O / Ctrl+S — only while the app is on screen. */
+        _registerFileKeys(saveFn) {
+            const offs = [
+                sac.hotkeys.register("mod+o", () => this._open(), { group: "File", description: "Open" }),
+                sac.hotkeys.register("mod+s", () => saveFn(), { group: "File", description: "Save / export" }),
+            ];
+            return () => offs.forEach((off) => off());
         }
 
         /* ------------------------------------------------------- magic wand -- */

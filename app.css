@@ -13,12 +13,6 @@ app-background-remover .br-split { flex: 1; min-width: 0; min-height: 0; }
 /* The split's divider draws the edge — no second hairline from the sidebar. */
 app-background-remover .br-panel:not([open]) { border-right: none; }
 
-app-background-remover .br-note {
-    margin: 0;
-    font-size: 0.72rem;
-    line-height: 1.5;
-    color: var(--text-muted);
-}
 app-background-remover .br-wand { display: flex; flex-direction: column; gap: 0.75rem; }
 app-background-remover .br-wand[hidden] { display: none; }
 app-background-remover .br-device {
@@ -90,11 +84,19 @@ app-background-remover .br-pane-src.space-pan .br-src { cursor: grab; }
 
 app-background-remover .nav-icon-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
-app-background-remover .br-empty {
+/* Empty state: the drop zone, centred; the stage around it still takes drops. */
+app-background-remover .app-drop {
     position: absolute;
     inset: 0;
+    display: flex;
+    align-items: center;
     justify-content: center;
+    padding: 24px;
     pointer-events: none;
+}
+app-background-remover .app-drop sac-drop-zone {
+    pointer-events: auto;
+    width: min(320px, 100%);
 }
 app-background-remover .br-stage.has-image .br-empty { display: none; }
 app-background-remover .br-stage.dragover {
@@ -124,6 +126,7 @@ app-background-remover .br-bar { width: 240px; }
 
 app-background-remover .br-help { padding: 16px; font-size: 0.85rem; line-height: 1.6; }
 app-background-remover .br-help ul { padding-left: 18px; margin: 8px 0; }
+app-background-remover .br-help h3 { color: var(--accent-text); margin: 0.9em 0 0.3em; font-size: 0.95rem; }
 
 /* Narrow: the panes stack instead of squeezing side by side. */
 @media (max-width: 768px) {
