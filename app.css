@@ -87,7 +87,8 @@ app-background-remover .nav-icon-btn:disabled { opacity: 0.35; cursor: default; 
 /* ---- empty state: the shared .app-drop block (same in all four DREAM
    TOOLS-born apps — keep it identical). The zone carries class
    "on-viewport" (kit 2.12.0), so it reads dark on --viewport-bg in both
-   themes. The wrapper clears the top label row and the bottom HUD. ---- */
+   themes; its glass is made opaque so the scene does not show through.
+   The wrapper clears the top label row and the bottom HUD. ---- */
 .app-drop {
     position: absolute;
     inset: 0;
@@ -99,6 +100,7 @@ app-background-remover .nav-icon-btn:disabled { opacity: 0.35; cursor: default; 
     pointer-events: none;
 }
 .app-drop sac-drop-zone {
+    --glass: color-mix(in srgb, var(--lift) 5%, var(--viewport-bg));
     --drop-zone-min-height: 120px;
     width: min(320px, 100%);
     pointer-events: auto;
