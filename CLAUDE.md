@@ -55,8 +55,11 @@ background-remover, mesh-optimizer, svg-to-3d) — keep them identical.
    the kit's `on-viewport` class, because the viewport is black in both
    themes, plus one opaque `--glass` line — the kit's glass is translucent
    and the scene showed through; clears the label row and the HUD). Its
-   click / Enter go through `context.files.open`, not
-   the device picker.
+   click / Enter go through `context.files.open`, not the device picker.
+   The zone is `quiet` (kit ≥ 2.36): files it did not take get one toast
+   from the `_wireDropZone` snippet, built from `sac:rejected`'s
+   `detail.rejected` — the zone hides once a file opens, so its own line
+   would go unseen after a partial drop.
 5. **Settings are remembered:** controls with `data-keep="key"` are saved to
    `context.fs` ("settings") and replayed on mount through their kit event.
    Per-document values (e.g. a threshold fitted to one image) are not kept.
@@ -78,8 +81,10 @@ background-remover, mesh-optimizer, svg-to-3d) — keep them identical.
     through `sac.hotkeys.hold` (kit ≥ 2.12).
 11. **Feedback is visible:** results and warnings go to `sac.toast`, work that
     blocks for more than a moment shows a busy overlay — never console only.
-12. **Kit controls with their limits:** `sac-stepper` only for short integers
-    (its value field is 3ch wide); decimals stay kit-styled number inputs.
+12. **Kit controls with their limits:** `sac-stepper` for numbers, decimals
+    included (kit ≥ 2.12.1 sizes its field to the widest value of min/max) —
+    keep `min`/`max` tight so the pill fits a half-width panel column; it
+    snaps every value to its `step` grid.
     Slider readouts carry a unit or named steps, never a bare technical number.
 13. **Theme toggle** (`sac-theme-toggle` in the nav's `context` slot) only
     standalone — removed when `context.host` is set.
@@ -120,6 +125,20 @@ Shared by the four apps that came out of DREAM TOOLS — keep identical.
   either belongs in all four — say so in the commit.
 
 ## Open items
+
+Kit 2.36.0 is vendored (2026-11-09; before that 2.12.0). Taken up from the
+releases in between: the quiet drop zone with one toast per `sac:rejected`
+(2.36), a solid busy overlay under reduced transparency / more contrast
+(2.33). Checked and n/a here: `sac-log`, `sac-loader` (the busy overlay is
+the app's own and covers only the stage), `sac-dialog` (only
+`sac.dialog.confirm`), explicit toast durations, long-press (a held finger
+on the original fires `contextmenu`, which only blocks the browser menu in
+magic-wand mode; the wand acts on the tap itself).
+
+Version skew: hosted on the desktop the app runs on the host's kit, so the
+2.36 behaviour (quiet zone, `detail.rejected`) appears only once
+`sacrvm-desktop` re-vendors. The snippet falls back to the bare `files`
+list of an older kit.
 
 Owner decisions open:
 - **Accent colour:** own pink vs following the desktop colour by default.
