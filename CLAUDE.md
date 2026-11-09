@@ -13,8 +13,8 @@ the same shared file space.
 (one custom element, classic script, guarded define), `app.css`, `index.html`
 as the standalone harness, and `kit/` — the vendored kit.
 
-- **No build step, ever.** Vanilla custom elements, plain CSS, `npx serve .`
-  and F5.
+- **No build step, ever.** Vanilla custom elements, plain CSS, a static
+  server and F5.
 - **The kit is vendored** (autark): `kit/` is the release ZIP's copy,
   verbatim — `kit/VERSION` says which — and never edited here. To upgrade,
   delete `kit/` and unzip the next release (see the appkit's `CONSUMING.md`).
@@ -98,8 +98,9 @@ background-remover, mesh-optimizer, svg-to-3d) — keep them identical.
 
 Shared by the four apps that came out of DREAM TOOLS — keep identical.
 
-- **Dev loop:** `npx serve . -l 3342` (Firepit command "Serve"), F5. `serve.json`
-  disables caching.
+- **Dev loop:** `python3 -m http.server 3342` (Firepit command "Run site"),
+  F5. `npx serve . -l 3342` works too and reads `serve.json`, which disables
+  caching.
 - **Test both runtimes — they fail differently.** Standalone (`index.html`,
   vendored kit) AND installed on https://desktop.sacrvm.dev/ (the host's kit
   is live there; the app is injected into the host page). Recipe and a

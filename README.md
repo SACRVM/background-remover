@@ -7,8 +7,10 @@ account, no cost. Built on
 as an app on a SACRVM desktop.
 
 ```bash
-npx serve .
+python3 -m http.server 3342
 ```
+
+Then open http://localhost:3342/.
 
 ## What it does
 

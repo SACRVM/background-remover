@@ -1,11 +1,37 @@
 {
+  // Firepit per-project config. JSONC: comments and trailing commas are allowed.
+  // Commands follow the Linux patterns of ../firepit-template/.firepit/config.json:
+  // a group per area, a short lowercase name, a one-line description.
+
   "version": 1,
   "id": "background-remover",
+
   "commands": [
-    { "name": "Serve", "type": "Shell", "icon": "🚀", "command": "cmd",
-      "args": ["/c", "npx", "serve", ".", "-l", "3342"],
-      "window": "reuse:serve", "longRunning": true },
-    { "name": "Open", "type": "Url", "icon": "✂️", "url": "http://localhost:3342/" },
-    { "name": "GitHub", "type": "Url", "icon": "🐙", "url": "https://github.com/SACRVM/background-remover" }
+    {
+      "group": "Run",
+      "name": "site",
+      "description": "Serves the app's standalone harness on port 3342 (also reachable from a phone on the LAN).",
+      "type": "shell",
+      "command": "python3",
+      "args": ["-m", "http.server", "3342"],
+      "window": "reuse:site",
+      "longRunning": true
+    },
+
+    {
+      "group": "Open",
+      "name": "app",
+      "description": "The Background Remover on the local server.",
+      "type": "url",
+      "url": "http://localhost:3342/"
+    },
+
+    {
+      "group": "Git",
+      "name": "repo",
+      "description": "The repository on GitHub.",
+      "type": "url",
+      "url": "https://github.com/SACRVM/background-remover"
+    }
   ]
 }
